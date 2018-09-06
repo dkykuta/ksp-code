@@ -24,6 +24,7 @@
 #include "../src/ksp.hpp"
 #include "../src/path.hpp"
 #include "../src/graph.hpp"
+#include "../src/candidatepath.hpp"
 
 TEST(PASCOAL_KSP, WRAPPED) {
     haruki::KSP<haruki::PascoalKSP> pascoal;
@@ -151,12 +152,14 @@ TEST(PASCOAL_KSP, CANDIDATES) {
 
     // TODO: separar o preproc e posproc
     pascoalKSP.preproc(h, 0, 6, 2);
-    std::set<haruki::Path> candidates = pascoalKSP.generateCandidates(h, 6, pvec, minPath);
+    std::set<haruki::CandidatePath> candidates = pascoalKSP.generateCandidates(h, 6, pvec, minPath, 0);
     ASSERT_EQ(2, candidates.size());
 
     std::set<haruki::Path> fixedCostCandidates;
-    for (std::set<haruki::Path>::iterator it = candidates.begin(); it != candidates.end(); it++) {
-        haruki::Path p = pascoalKSP.fixCosts(g, *it);
+    for (std::set<haruki::CandidatePath>::iterator it = candidates.begin(); it != candidates.end(); it++) {
+        haruki::CandidatePath cpx = *it;
+        haruki::Path px = cpx.path();
+        haruki::Path p = pascoalKSP.fixCosts(g, px);
         fixedCostCandidates.insert(p);
     }
 
@@ -209,10 +212,12 @@ TEST(PASCOAL_KSP, CANDIDATE_AT_EDGE) {
     // TODO: separar o preproc e posproc
     pascoalKSP.preproc(h, 0, 6, 2);
 
+    pascoalKSP.removeEdgesSharedPrefix(h, 6, pvec, minPath, 0);
     haruki::Path candidate1 = pascoalKSP.generateCandidateAtEdge(h, 6, pvec, minPath, 0);
     haruki::Path fixedCostCandidate1 = pascoalKSP.fixCosts(g, candidate1);
     ASSERT_EQ(paux2, fixedCostCandidate1);
 
+    pascoalKSP.removeEdgesSharedPrefix(h, 6, pvec, minPath, 1);
     haruki::Path candidate2 = pascoalKSP.generateCandidateAtEdge(h, 6, pvec, minPath, 1);
     haruki::Path fixedCostCandidate2 = pascoalKSP.fixCosts(g, candidate2);
     ASSERT_EQ(paux1, fixedCostCandidate2);

@@ -25,7 +25,6 @@
 #include <vector>
 #include <functional>
 #include <utility>
-#include <set>
 
 namespace haruki
 {
@@ -35,13 +34,12 @@ class CandidateSet
 {
   private:
     std::priority_queue<T, std::vector<T>, std::greater<T> > candQ_;
-    std::set<T> alreadyIncluded_;
     T max_;
     int inCount_;
     int k_;
 
   public:
-    CandidateSet(int k): max_{0}, inCount_{0}, k_{k} {}
+    CandidateSet(int k, T minValue): max_(minValue), inCount_(0), k_(k) {};
 
     T popFirst()
     {
@@ -57,11 +55,7 @@ class CandidateSet
                 return;
             }
         }
-        if (alreadyIncluded_.find(candidate) != alreadyIncluded_.end()) {
-            return;
-        }
         candQ_.push(candidate);
-        alreadyIncluded_.insert(candidate);
         inCount_++;
         if (candidate > max_) {
             max_ = candidate;

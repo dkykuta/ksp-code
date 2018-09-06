@@ -24,46 +24,138 @@
 #include "../src/ksp.hpp"
 #include "../src/path.hpp"
 #include "../src/graph.hpp"
+#include "../src/candidatepath.hpp"
 
-TEST(FENG_KSP, WRAPPED) {
+TEST(FENG_KSP, WRAPPED1) {
+    haruki::KSP<haruki::FengKSP> feng;
+
+    haruki::GraphBuilder pg;
+    pg.addEdge(0, 2, 1);
+    pg.addEdge(0, 3, 1);
+    pg.addEdge(0, 5, 1);
+    pg.addEdge(0, 6, 1);
+    pg.addEdge(1, 2, 1);
+    pg.addEdge(1, 3, 1);
+    pg.addEdge(2, 0, 1);
+    pg.addEdge(2, 3, 1);
+    pg.addEdge(2, 5, 1);
+    pg.addEdge(2, 6, 1);
+    pg.addEdge(3, 2, 1);
+    pg.addEdge(3, 4, 1);
+    pg.addEdge(3, 6, 1);
+    pg.addEdge(4, 1, 1);
+    pg.addEdge(4, 3, 1);
+    pg.addEdge(5, 0, 1);
+    pg.addEdge(5, 4, 1);
+    pg.addEdge(5, 6, 1);
+    pg.addEdge(6, 3, 1);
+    pg.addEdge(6, 5, 1);
+
+    haruki::Graph g(pg);
+
+    std::vector<haruki::Path> result = feng.run(g, 0, 6, 10);
+
+    ASSERT_EQ(10, result.size());
+
+    haruki::Path firstMinPath = result[0];
+
+    EXPECT_DOUBLE_EQ(1.0, firstMinPath.cost());
+    ASSERT_EQ(2, firstMinPath.size());
+    EXPECT_EQ(0, firstMinPath.getVertList()[0]);
+    EXPECT_EQ(6, firstMinPath.getVertList()[1]);
+
+    haruki::Path secondMinPath = result[1];
+
+    EXPECT_DOUBLE_EQ(2.0, secondMinPath.cost());
+    ASSERT_EQ(3, secondMinPath.size());
+    EXPECT_EQ(0, secondMinPath.getVertList()[0]);
+    EXPECT_EQ(2, secondMinPath.getVertList()[1]);
+    EXPECT_EQ(6, secondMinPath.getVertList()[2]);
+
+    haruki::Path ninethMinPath = result[8];
+
+    EXPECT_DOUBLE_EQ(4.0, ninethMinPath.cost());
+    ASSERT_EQ(5, ninethMinPath.size());
+    EXPECT_EQ(0, ninethMinPath.getVertList()[0]);
+    EXPECT_EQ(5, ninethMinPath.getVertList()[1]);
+    EXPECT_EQ(4, ninethMinPath.getVertList()[2]);
+    EXPECT_EQ(3, ninethMinPath.getVertList()[3]);
+    EXPECT_EQ(6, ninethMinPath.getVertList()[4]);
+}
+
+TEST(FENG_KSP, WRAPPED2) {
     haruki::KSP<haruki::FengKSP> feng;
 
     haruki::GraphBuilder pg;
     pg.addEdge(0, 1, 1);
-    pg.addEdge(0, 2, 2);
-    pg.addEdge(1, 3, 2);
-    pg.addEdge(1, 4, 2);
+    pg.addEdge(0, 2, 1);
+    pg.addEdge(0, 5, 1);
+    pg.addEdge(0, 6, 1);
+    pg.addEdge(1, 0, 1);
+    pg.addEdge(1, 3, 1);
+    pg.addEdge(1, 4, 1);
     pg.addEdge(1, 5, 1);
-    pg.addEdge(2, 1, 2);
-    pg.addEdge(2, 4, 2);
-    pg.addEdge(3, 2, 2);
-    pg.addEdge(3, 6, 2);
-    pg.addEdge(4, 6, 2);
+    pg.addEdge(2, 0, 1);
+    pg.addEdge(2, 1, 1);
+    pg.addEdge(2, 4, 1);
+    pg.addEdge(2, 5, 1);
+    pg.addEdge(3, 1, 1);
+    pg.addEdge(3, 2, 1);
+    pg.addEdge(3, 5, 1);
+    pg.addEdge(3, 6, 1);
+    pg.addEdge(4, 0, 1);
+    pg.addEdge(4, 3, 1);
+    pg.addEdge(4, 5, 1);
+    pg.addEdge(4, 6, 1);
+    pg.addEdge(5, 0, 1);
+    pg.addEdge(5, 1, 1);
+    pg.addEdge(5, 3, 1);
+    pg.addEdge(5, 4, 1);
     pg.addEdge(5, 6, 1);
+    pg.addEdge(6, 0, 1);
+    pg.addEdge(6, 2, 1);
+    pg.addEdge(6, 3, 1);
+    pg.addEdge(6, 4, 1);
+    pg.addEdge(6, 5, 1);
 
     haruki::Graph g(pg);
 
-    std::vector<haruki::Path> result = feng.run(g, 0, 6, 2);
+    std::vector<haruki::Path> result = feng.run(g, 0, 6, 10);
 
-    ASSERT_EQ(2, result.size());
+    ASSERT_EQ(10, result.size());
 
     haruki::Path firstMinPath = result[0];
 
-    ASSERT_DOUBLE_EQ(3.0, firstMinPath.cost());
-    ASSERT_EQ(4, firstMinPath.size());
-    ASSERT_EQ(0, firstMinPath.getVertList()[0]);
-    ASSERT_EQ(1, firstMinPath.getVertList()[1]);
-    ASSERT_EQ(5, firstMinPath.getVertList()[2]);
-    ASSERT_EQ(6, firstMinPath.getVertList()[3]);
+    EXPECT_DOUBLE_EQ(1.0, firstMinPath.cost());
+    ASSERT_EQ(2, firstMinPath.size());
+    EXPECT_EQ(0, firstMinPath.getVertList()[0]);
+    EXPECT_EQ(6, firstMinPath.getVertList()[1]);
 
     haruki::Path secondMinPath = result[1];
 
-    ASSERT_DOUBLE_EQ(5.0, secondMinPath.cost());
-    ASSERT_EQ(4, secondMinPath.size());
-    ASSERT_EQ(0, secondMinPath.getVertList()[0]);
-    ASSERT_EQ(1, secondMinPath.getVertList()[1]);
-    ASSERT_EQ(3, secondMinPath.getVertList()[2]);
-    ASSERT_EQ(6, secondMinPath.getVertList()[3]);
+    EXPECT_DOUBLE_EQ(2.0, secondMinPath.cost());
+    ASSERT_EQ(3, secondMinPath.size());
+    EXPECT_EQ(0, secondMinPath.getVertList()[0]);
+    EXPECT_EQ(5, secondMinPath.getVertList()[1]);
+    EXPECT_EQ(6, secondMinPath.getVertList()[2]);
+
+    haruki::Path thirdMinPath = result[2];
+
+    EXPECT_DOUBLE_EQ(3.0, thirdMinPath.cost());
+    ASSERT_EQ(4, thirdMinPath.size());
+    EXPECT_EQ(0, thirdMinPath.getVertList()[0]);
+    EXPECT_EQ(1, thirdMinPath.getVertList()[1]);
+    EXPECT_EQ(3, thirdMinPath.getVertList()[2]);
+    EXPECT_EQ(6, thirdMinPath.getVertList()[3]);
+
+    haruki::Path ninethMinPath = result[8];
+
+    EXPECT_DOUBLE_EQ(3.0, ninethMinPath.cost());
+    ASSERT_EQ(4, ninethMinPath.size());
+    EXPECT_EQ(0, ninethMinPath.getVertList()[0]);
+    EXPECT_EQ(5, ninethMinPath.getVertList()[1]);
+    EXPECT_EQ(4, ninethMinPath.getVertList()[2]);
+    EXPECT_EQ(6, ninethMinPath.getVertList()[3]);
 }
 
 TEST(FENG_KSP, PREPROC_DAG_UPSTREAM) {
@@ -145,12 +237,15 @@ TEST(FENG_KSP, CANDIDATES) {
 
     // TODO: separar o preproc e posproc
     fengKSP.preproc(h, 0, 6, 2);
-    std::set<haruki::Path> candidates = fengKSP.generateCandidates(h, 6, pvec, minPath);
+    fengKSP.initializeYellowGraph(h);
+    std::set<haruki::CandidatePath> candidates = fengKSP.generateCandidates(h, 6, pvec, minPath, 0);
     ASSERT_EQ(2, candidates.size());
 
     std::set<haruki::Path> fixedCostCandidates;
-    for (std::set<haruki::Path>::iterator it = candidates.begin(); it != candidates.end(); it++) {
-        haruki::Path p = fengKSP.fixCosts(g, *it);
+    for (std::set<haruki::CandidatePath>::iterator it = candidates.begin(); it != candidates.end(); it++) {
+        haruki::CandidatePath cpx = *it;
+        haruki::Path px = cpx.path();
+        haruki::Path p = fengKSP.fixCosts(g, px);
         fixedCostCandidates.insert(p);
     }
 
@@ -199,9 +294,9 @@ TEST(FENG_KSP, CANDIDATES_AT_EDGE) {
     fengKSP.preproc(h, 0, 6, 2);
     fengKSP.colors_ = std::vector<int>(h.getNumVert(), 3);
     fengKSP.initializeYellowGraph(h);
-    fengKSP.fixColorsNewDeviationVertex(h, 6, pvec, paux1, 0);
+    std::vector<int> newYellowList = fengKSP.initialColor(h, 6, pvec, paux1, 1);
     fengKSP.removeEdgesSharedPrefix(h, 6, pvec, paux1, 1);
-    fengKSP.fixColorsNewDeviationVertex(h, 6, pvec, paux1, 1);
+    fengKSP.updateArtificialEdges(h, newYellowList, -1, 1);
     haruki::Path candidate = fengKSP.generateCandidateAtEdge(h, 6, pvec, paux1, 1);
 
     haruki::Path fixedCostCandidate = fengKSP.fixCosts(g, candidate);
@@ -209,42 +304,328 @@ TEST(FENG_KSP, CANDIDATES_AT_EDGE) {
     ASSERT_EQ(paux2, fixedCostCandidate);
 }
 
-TEST(FENG_KSP, COLORS) {
+TEST(FENG_KSP, COLOR_INITIAL) {
+    int FENG_COLOR_RED = 1;
+    int FENG_COLOR_YELLOW = 2;
+    int FENG_COLOR_GREEN = 3;
+
     haruki::FengKSP fengKSP;
 
     haruki::GraphBuilder pg;
     pg.addEdge(0, 1, 1);
-    pg.addEdge(0, 2, 2);
-    pg.addEdge(1, 3, 2);
-    pg.addEdge(1, 4, 2);
-    pg.addEdge(1, 5, 1);
-    pg.addEdge(2, 1, 2);
-    pg.addEdge(2, 4, 2);
-    pg.addEdge(3, 2, 2);
-    pg.addEdge(3, 6, 2);
-    pg.addEdge(4, 6, 2);
+    pg.addEdge(1, 2, 1);
+    pg.addEdge(1, 3, 1);
+    pg.addEdge(2, 3, 1);
+    pg.addEdge(3, 4, 1);
+    pg.addEdge(3, 5, 1);
+    pg.addEdge(3, 6, 1);
+    pg.addEdge(3, 12, 1);
+    pg.addEdge(4, 13, 1);
+    pg.addEdge(4, 14, 1);
     pg.addEdge(5, 6, 1);
-
+    pg.addEdge(6, 2, 1);
+    pg.addEdge(6, 7, 1);
+    pg.addEdge(7, 8, 1);
+    pg.addEdge(8, 9, 1);
+    pg.addEdge(9, 10, 1);
+    pg.addEdge(10, 14, 1);
+    pg.addEdge(11, 1, 1);
+    pg.addEdge(12, 11, 1);
+    pg.addEdge(13, 12, 1);
+    
     haruki::Graph g(pg);
 
-    fengKSP.colors_ = std::vector<int>(g.getNumVert(), 3);
+    fengKSP.preproc(g, 0, 14, 2);
+    fengKSP.colors_ = std::vector<int>(g.getNumVert(), FENG_COLOR_GREEN);
+
+    g.removeEdge(3, 4);
 
     haruki::Path minPath;
     minPath.addEdge(0, 1, 1.0);
-    minPath.addEdge(1, 5, 1.0);
-    minPath.addEdge(5, 6, 1.0);
+    minPath.addEdge(1, 3, 1.0);
+    minPath.addEdge(3, 4, 1.0);
+    minPath.addEdge(4, 14, 1.0);
 
-    fengKSP.preproc(g, 0, 6, 2);
     std::vector<haruki::Path> pvec;
 
-    fengKSP.initializeYellowGraph(g);
-    fengKSP.fixColorsNewDeviationVertex(g, 6, pvec, minPath, 1);
+    std::vector<int> newYellowList(std::move(fengKSP.initialColor(g, 14, pvec, minPath, 2)));
+    std::set<int> newYellow(newYellowList.begin(), newYellowList.end());
 
-    ASSERT_EQ(1, fengKSP.colors_[0]);
-    ASSERT_EQ(2, fengKSP.colors_[1]);
-    ASSERT_EQ(2, fengKSP.colors_[2]);
-    ASSERT_EQ(3, fengKSP.colors_[3]);
-    ASSERT_EQ(3, fengKSP.colors_[4]);
-    ASSERT_EQ(3, fengKSP.colors_[5]);
-    ASSERT_EQ(3, fengKSP.colors_[6]);
+    EXPECT_EQ(FENG_COLOR_RED, fengKSP.colors_[0]);
+    EXPECT_EQ(FENG_COLOR_RED, fengKSP.colors_[1]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[2]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[3]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[4]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[5]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[6]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[7]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[8]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[9]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[10]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[11]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[12]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[13]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[14]);
+
+    ASSERT_EQ(7, newYellow.size());
+    EXPECT_TRUE(newYellow.find(2) != newYellow.end());
+    EXPECT_TRUE(newYellow.find(3) != newYellow.end());
+    EXPECT_TRUE(newYellow.find(5) != newYellow.end());
+    EXPECT_TRUE(newYellow.find(6) != newYellow.end());
+    EXPECT_TRUE(newYellow.find(11) != newYellow.end());
+    EXPECT_TRUE(newYellow.find(12) != newYellow.end());
+    EXPECT_TRUE(newYellow.find(13) != newYellow.end());
+
+    fengKSP.posproc(g, 0, 14, 2, pvec);
 }
+
+TEST(FENG_KSP, UPDATE_COLOR) {
+    int FENG_COLOR_RED = 1;
+    int FENG_COLOR_YELLOW = 2;
+    int FENG_COLOR_GREEN = 3;
+
+    haruki::FengKSP fengKSP;
+
+    haruki::GraphBuilder pg;
+    pg.addEdge(0, 1, 1);
+    pg.addEdge(1, 2, 1);
+    pg.addEdge(1, 3, 1);
+    pg.addEdge(2, 3, 1);
+    pg.addEdge(3, 4, 1);
+    pg.addEdge(3, 5, 1);
+    pg.addEdge(3, 6, 1);
+    pg.addEdge(3, 12, 1);
+    pg.addEdge(4, 13, 1);
+    pg.addEdge(4, 14, 1);
+    pg.addEdge(5, 6, 1);
+    pg.addEdge(6, 2, 1);
+    pg.addEdge(6, 7, 1);
+    pg.addEdge(7, 8, 1);
+    pg.addEdge(8, 9, 1);
+    pg.addEdge(9, 10, 1);
+    pg.addEdge(10, 14, 1);
+    pg.addEdge(11, 1, 1);
+    pg.addEdge(12, 11, 1);
+    pg.addEdge(13, 12, 1);
+    
+    haruki::Graph g(pg);
+
+    fengKSP.preproc(g, 0, 14, 2);
+    fengKSP.colors_ = std::vector<int>(g.getNumVert(), FENG_COLOR_GREEN);
+
+    g.removeEdge(3, 4);
+
+    haruki::Path minPath;
+    minPath.addEdge(0, 1, 1.0);
+    minPath.addEdge(1, 3, 1.0);
+    minPath.addEdge(3, 4, 1.0);
+    minPath.addEdge(4, 14, 1.0);
+
+    std::vector<haruki::Path> pvec;
+    
+    fengKSP.initialColor(g, 14, pvec, minPath, 2);
+
+    EXPECT_EQ(FENG_COLOR_RED, fengKSP.colors_[0]);
+    EXPECT_EQ(FENG_COLOR_RED, fengKSP.colors_[1]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[2]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[3]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[4]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[5]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[6]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[7]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[8]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[9]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[10]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[11]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[12]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[13]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[14]);
+    
+    std::vector<int> newYellowList(std::move(fengKSP.updateColor(g, 14, pvec, minPath, 3)));
+    std::set<int> newYellow(newYellowList.begin(), newYellowList.end());
+
+    EXPECT_EQ(FENG_COLOR_RED, fengKSP.colors_[0]);
+    EXPECT_EQ(FENG_COLOR_RED, fengKSP.colors_[1]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[2]);
+    EXPECT_EQ(FENG_COLOR_RED, fengKSP.colors_[3]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[4]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[5]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[6]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[7]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[8]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[9]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[10]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[11]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[12]);
+    EXPECT_EQ(FENG_COLOR_YELLOW, fengKSP.colors_[13]);
+    EXPECT_EQ(FENG_COLOR_GREEN, fengKSP.colors_[14]);
+
+    ASSERT_EQ(1, newYellow.size());
+    EXPECT_TRUE(newYellow.find(4) != newYellow.end());
+
+    fengKSP.posproc(g, 0, 14, 2, pvec);
+}
+
+TEST(FENG_KSP, UPDATE_ARTIFICIAL_EDGES) {
+    int FENG_COLOR_GREEN = 3;
+
+    haruki::FengKSP fengKSP;
+
+    haruki::GraphBuilder pg;
+    pg.addEdge(0, 1, 1);
+    pg.addEdge(1, 2, 1);
+    pg.addEdge(1, 3, 1);
+    pg.addEdge(2, 3, 1);
+    pg.addEdge(3, 4, 1);
+    pg.addEdge(3, 5, 1);
+    pg.addEdge(3, 6, 1);
+    pg.addEdge(3, 12, 1);
+    pg.addEdge(4, 13, 1);
+    pg.addEdge(4, 14, 1);
+    pg.addEdge(5, 6, 1);
+    pg.addEdge(6, 2, 1);
+    pg.addEdge(6, 7, 1);
+    pg.addEdge(7, 8, 1);
+    pg.addEdge(8, 9, 1);
+    pg.addEdge(9, 10, 1);
+    pg.addEdge(10, 14, 1);
+    pg.addEdge(11, 1, 1);
+    pg.addEdge(12, 11, 1);
+    pg.addEdge(13, 12, 1);
+    
+    haruki::Graph g(pg);
+
+    fengKSP.preproc(g, 0, 14, 2);
+    fengKSP.colors_ = std::vector<int>(g.getNumVert(), FENG_COLOR_GREEN);
+
+    g.removeEdge(3, 4);
+
+    haruki::Path minPath;
+    minPath.addEdge(0, 1, 1.0);
+    minPath.addEdge(1, 3, 1.0);
+    minPath.addEdge(3, 4, 1.0);
+    minPath.addEdge(4, 14, 1.0);
+
+    std::vector<haruki::Path> pvec;
+       
+    std::vector<int> newYellowList = fengKSP.initialColor(g, 14, pvec, minPath, 2);
+
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(0, 1));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(1, 2));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(1, 3));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(2, 3));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(3, 4));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(3, 5));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(3, 6));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(3, 12));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(4, 13));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(4, 14));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(5, 6));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(6, 2));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(6, 7));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(7, 8));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(8, 9));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(9, 10));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(10, 14));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(11, 1));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(12, 11));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(13, 12));
+
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(0, 15));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(1, 15));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(2, 15));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(3, 15));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(4, 15));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(5, 15));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(6, 15));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(7, 15));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(8, 15));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(9, 15));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(10, 15));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(11, 15));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(12, 15));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(13, 15));
+    ASSERT_EQ(true, fengKSP.yellowGraph_->isRemoved(14, 15));
+
+    fengKSP.updateArtificialEdges(g, newYellowList, -1, 3);
+
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(0, 1));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(1, 2));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(1, 3));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(2, 3));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(3, 4));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(3, 5));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(3, 6));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(3, 12));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(4, 13));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(4, 14));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(5, 6));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(6, 2));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(6, 7));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(7, 8));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(8, 9));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(9, 10));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(10, 14));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(11, 1));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(12, 11));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(13, 12));
+
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(0, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(1, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(2, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(3, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(4, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(5, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(6, 15));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(7, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(8, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(9, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(10, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(11, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(12, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(13, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(14, 15));
+
+    std::vector<int> newYellowList2 = fengKSP.updateColor(g, 14, pvec, minPath, 3); // indice 3 no path
+    fengKSP.updateArtificialEdges(g, newYellowList2, 3, 4); // vertice 3
+
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(0, 1));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(1, 2));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(1, 3));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(2, 3));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(3, 4));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(3, 5));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(3, 6));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(3, 12));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(4, 13));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(4, 14));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(5, 6));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(6, 2));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(6, 7));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(7, 8));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(8, 9));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(9, 10));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(10, 14));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(11, 1));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(12, 11));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(13, 12));
+
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(0, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(1, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(2, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(3, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(4, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(5, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(6, 15));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(7, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(8, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(9, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(10, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(11, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(12, 15));
+    EXPECT_EQ(true, fengKSP.yellowGraph_->isRemoved(13, 15));
+    EXPECT_EQ(false, fengKSP.yellowGraph_->isRemoved(14, 15));
+
+    fengKSP.posproc(g, 0, 14, 2, pvec);
+}
+

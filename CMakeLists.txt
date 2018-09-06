@@ -32,14 +32,9 @@ set(LIB_SOURCE
   src/yenksp.cpp
   src/pascoalksp.cpp
   src/fengksp.cpp
-  src/fengcopyksp.cpp
-  src/hybridfengksp.cpp
+  src/hybridksp.cpp
   src/dimacsreader.cpp
 )
-
-set(MAIN_SOURCE 
-  src/main.cpp
-  ${LIB_SOURCE})
 
 set(TEST_SOURCE 
   test/testMain.cpp
@@ -48,8 +43,6 @@ set(TEST_SOURCE
 set(SIMPLE_MAIN_SOURCE
     src/mainsinglealgo.cpp
     ${LIB_SOURCE})
-
-add_executable(${PROJECT_NAME} ${MAIN_SOURCE})
 
 add_executable(ksp-single-algorithm ${SIMPLE_MAIN_SOURCE})
 set_target_properties( ksp-single-algorithm PROPERTIES COMPILE_FLAGS "-DHRK_COUNT_" )

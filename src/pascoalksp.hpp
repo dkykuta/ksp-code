@@ -26,6 +26,7 @@
 #include "path.hpp"
 #include "graph.hpp"
 #include "yenksp.hpp"
+#include "candidatepath.hpp"
 
 namespace haruki
 {

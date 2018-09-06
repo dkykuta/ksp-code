@@ -27,13 +27,13 @@
 #include "testPath.cpp"
 #include "testDijkstra.cpp"
 #include "testPriorityQueue.cpp"
+#include "testCandidatePath.cpp"
 #include "testSet.cpp"
 #include "testCandidateSet.cpp"
 #include "testYenKSP.cpp"
 #include "testPascoalKSP.cpp"
 #include "testFengKSP.cpp"
-#include "testFengCopyKSP.cpp"
-#include "testHybridFengKSP.cpp"
+#include "testHybridKSP.cpp"
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

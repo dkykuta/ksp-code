@@ -31,6 +31,10 @@
 namespace haruki
 {
 
+// #define FENG_COLOR_RED 1
+// #define FENG_COLOR_YELLOW 2
+// #define FENG_COLOR_GREEN 3
+
 class FengKSP : public PascoalKSP
 {
 protected:
@@ -38,10 +42,14 @@ protected:
   std::vector<int> colors_;
   Graph *yellowGraph_;
 
-  virtual std::set<Path> generateCandidates(Graph& g, int t, std::vector<Path> &R, Path &path);
+  virtual std::set<CandidatePath> generateCandidates(Graph& g, int t, std::vector<Path> &R, Path &path, int oldDeviationIdx);
   virtual Path generateCandidateAtEdge(Graph &h, int t, std::vector<Path> &R, Path &path, int j);
-  virtual void fixColorsNewDeviationVertex(Graph &g, int t, std::vector<Path> &R, Path &path, int deviationVertex);
+  
+
   virtual void initializeYellowGraph(Graph &g);
+  std::vector<int> initialColor(Graph &g, int t, std::vector<Path> &R, Path &path, int oldDeviationIdx);
+  std::vector<int> updateColor(Graph &g, int t, std::vector<Path> &R, Path &path, int deviationIdx);
+  void updateArtificialEdges(Graph &g, std::vector<int> newYellowList, int oldDeviation, int deviation);
 
 public:
   virtual void preproc(Graph &g, int s, int t, int k);

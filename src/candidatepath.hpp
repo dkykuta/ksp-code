@@ -22,25 +22,27 @@
 #pragma once
 
 #include <vector>
-#include <set>
+#include <stdexcept>
+#include "graphaux.hpp"
 #include "path.hpp"
-#include "graph.hpp"
-#include "candidatepath.hpp"
 
 namespace haruki
 {
 
-class YenKSP
+class CandidatePath
 {
-
-protected:
-  virtual void removeEdgesSharedPrefix(Graph &h, int t, std::vector<Path> &R, Path &path, int j);
-  virtual std::set<CandidatePath> generateCandidates(Graph& g, int t, std::vector<Path> &R, Path &path, int devIdx);
-  virtual Path generateCandidateAtEdge(Graph &h, int t, std::vector<Path> &R, Path &path, int j);
+private:
+  int deviationIndex_;
+  Path path_;
 
 public:
-  virtual void preproc(Graph &g, int s, int t, int k);
-  virtual std::vector<Path> ksp(Graph& g, int s, int t, int k);
-  virtual std::vector<Path> posproc(Graph &g, int s, int t, int k, std::vector<Path> &response);
+  CandidatePath(): deviationIndex_(0), path_(Path()){};
+  // CandidatePath(int x): deviationIndex_(x), path_(Path()){};
+  CandidatePath(int deviationIndex, Path path) : deviationIndex_(deviationIndex), path_(path) {};
+  Path path() {return path_;};
+  int deviationIndex() { return deviationIndex_;};
+  bool operator<(const haruki::CandidatePath &rhs) const {return path_ < rhs.path_;};
+  bool operator>(const haruki::CandidatePath &rhs) const {return path_ > rhs.path_;};
+  bool operator==(const haruki::CandidatePath &rhs) const {return deviationIndex_ == rhs.deviationIndex_ && path_ == rhs.path_;};
 };
 }

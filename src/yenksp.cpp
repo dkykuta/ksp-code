@@ -24,6 +24,7 @@
 #include "graph.hpp"
 #include "path.hpp"
 #include "candidateset.hpp"
+#include "candidatepath.hpp"
 
 #ifdef HRK_COUNT_
 extern int hrk_response_path_size;
@@ -46,19 +47,20 @@ std::vector<Path> YenKSP::ksp(Graph &g, int s, int t, int k)
 {
   int sizeR = 0;
   std::vector<Path> response;
-  haruki::CandidateSet<Path> candidateSet(k);
+  haruki::CandidateSet<haruki::CandidatePath> candidateSet(k, CandidatePath());
 
   haruki::Path minPath = haruki::dijkstra::minPath(g, s, t);
 
-  candidateSet.addCandidate(minPath);
+  candidateSet.addCandidate(haruki::CandidatePath(0, minPath));
 
   for (int iter = 0; !candidateSet.empty() && iter < k; iter++)
   {
-    haruki::Path pPath = candidateSet.popFirst();
+    haruki::CandidatePath popped = candidateSet.popFirst();
+    haruki::Path pPath = popped.path();
     if (sizeR < k - 1)
     {
-      std::set<Path> candidates = generateCandidates(g, t, response, pPath);
-      for (std::set<Path>::iterator it = candidates.begin(); it != candidates.end(); it++)
+      std::set<CandidatePath> candidates = generateCandidates(g, t, response, pPath, popped.deviationIndex());
+      for (std::set<CandidatePath>::iterator it = candidates.begin(); it != candidates.end(); it++)
       {
         candidateSet.addCandidate(*it);
       }
@@ -67,26 +69,26 @@ std::vector<Path> YenKSP::ksp(Graph &g, int s, int t, int k)
     hrk_response_path_size += pPath.size();
     hrk_response_count++;
 #endif
-    response.push_back(pPath);
+    response.push_back(pPath); 
     sizeR++;
   }
   return response;
 }
 
-std::set<Path> YenKSP::generateCandidates(Graph &g, int t, std::vector<Path> &R, Path &path)
+std::set<CandidatePath> YenKSP::generateCandidates(Graph &g, int t, std::vector<Path> &R, Path &path, int devIdx) 
 {
-  std::set<Path> candidates;
+  std::set<CandidatePath> candidates;
 
-  for (int j = 0; j < path.size() - 1; j++)
+  for (int j = devIdx; j < path.size() - 1; j++)
   {
     removeEdgesSharedPrefix(g, t, R, path, j);
     haruki::Path cand = generateCandidateAtEdge(g, t, R, path, j);
     g.resetEdgesRemoved();
     if (cand.size() == 0)
     {
-      continue;
+      continue; 
     }
-    candidates.insert(cand);
+    candidates.insert(CandidatePath(j, cand));
   }
 
   return candidates;

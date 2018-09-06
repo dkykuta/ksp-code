@@ -19,7 +19,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
 */
-#include "fengksp.hpp"
+#include "hybridksp.hpp"
 #include "dijkstra.hpp"
 #include "graph.hpp"
 #include "path.hpp"
@@ -45,7 +45,7 @@ namespace haruki
 #define FENG_COLOR_YELLOW 2
 #define FENG_COLOR_GREEN 3
 
-void FengKSP::preproc(Graph &g, int s, int t, int k)
+void HybridKSP::preproc(Graph &g, int s, int t, int k)
 {
   PascoalKSP::preproc(g, s, t, k);
 
@@ -65,14 +65,14 @@ void FengKSP::preproc(Graph &g, int s, int t, int k)
     initializeYellowGraph(g);
 }
 
-std::vector<Path> FengKSP::ksp(Graph &g, int s, int t, int k)
+std::vector<Path> HybridKSP::ksp(Graph &g, int s, int t, int k)
 {
   std::vector<Path> retAux = PascoalKSP::ksp(g, s, t, k);
 
   return retAux;
 }
 
-std::vector<Path> FengKSP::posproc(Graph &g, int s, int t, int k, std::vector<Path> response)
+std::vector<Path> HybridKSP::posproc(Graph &g, int s, int t, int k, std::vector<Path> response)
 {
   std::vector<Path> ret;
   for (std::vector<Path>::iterator it = response.begin(); it != response.end(); it++)
@@ -84,7 +84,7 @@ std::vector<Path> FengKSP::posproc(Graph &g, int s, int t, int k, std::vector<Pa
   return ret;
 }
 
-std::set<CandidatePath> FengKSP::generateCandidates(Graph &g, int t, std::vector<Path> &R, Path &path, int oldDeviationIdx)
+std::set<CandidatePath> HybridKSP::generateCandidates(Graph &g, int t, std::vector<Path> &R, Path &path, int oldDeviationIdx)
 {
   std::set<CandidatePath> candidates;
   colors_ = std::vector<int>(g.getNumVert(), FENG_COLOR_GREEN);
@@ -93,24 +93,11 @@ std::set<CandidatePath> FengKSP::generateCandidates(Graph &g, int t, std::vector
 
   std::vector<int> newYellowList = initialColor(g, t, R, path, oldDeviationIdx);
 
-  // for (int j = 0; j < oldDeviationIdx; j++) {
-  //   removeEdgesSharedPrefix(g, t, R, path, j);
-  //   fixColorsNewDeviationVertex(g, t, R, path, j);
-  // }
-
-  int prevDeviation = -1;
   for (int j = oldDeviationIdx; j < path.size() - 1; j++)
   {
     removeEdgesSharedPrefix(g, t, R, path, j);
-    // fixColorsNewDeviationVertex(g, t, R, path, j);
-    int deviation = path.getVertList()[j];
-    if (prevDeviation == -1) {
-      updateArtificialEdges(g, newYellowList, prevDeviation, j);
-    } else {
-      std::vector<int> newYellowList2 = updateColor(g, t, R, path, j);
-      updateArtificialEdges(g, newYellowList2, prevDeviation, deviation);
-    }
-    prevDeviation = deviation;
+
+    std::vector<int> newYellowList2 = updateColor(g, t, R, path, j);
 
     haruki::Path cand = generateCandidateAtEdge(g, t, R, path, j);
     g.resetEdgesRemoved();
@@ -124,37 +111,69 @@ std::set<CandidatePath> FengKSP::generateCandidates(Graph &g, int t, std::vector
   return candidates;
 }
 
-Path FengKSP::generateCandidateAtEdge(Graph &h, int t, std::vector<Path> &R, Path &path, int j)
+Path HybridKSP::generateCandidateAtEdge(Graph &h, int t, std::vector<Path> &R, Path &path, int j)
 {
   EdgeInfo auxEdge = path.getEdgeInfo(j);
   int deviationVertex = auxEdge.tail;
   int artificialEndVertex = h.getNumVert();
 
-  haruki::Path minPathAux = haruki::dijkstra::minPath(*yellowGraph_, deviationVertex, artificialEndVertex);
+  double minCostFound = -1;
+  int headSelected = -1;
 
-  if (minPathAux.size() == 0)
-  {
-    return minPathAux;
+  EdgeOut::range edges_out = h.getEdgesOut(deviationVertex);
+  for (EdgeOut::iterator it = edges_out.begin(); it != edges_out.end(); ++it) {
+    EdgeInfo ei = *it;
+    if (minCostFound == -1 || ei.cost < minCostFound) {
+      if (dag_paths_next_[ei.head] != -1) {
+        headSelected = ei.head;
+        minCostFound = ei.cost;
+      }
+    }
   }
 
-#ifdef HRK_COUNT_
-  // hrk_feng_yellow_total_size += yellowGraph_->numEdges;
-  // hrk_feng_yellow_graph_count = 0;
-  hrk_feng_yellow_path_size += minPathAux.size();
-  hrk_feng_yellow_path_count++;
-#ifdef HRK_VERBOSE_
-  hrk_feng_yellow_path_list.push_back(minPathAux.size());
-#endif
-#endif
+  haruki::Path cand = path.subpath(0, j+1);
+  std::pair<int, int> lastEdge;
 
-  haruki::Path cand = path.subpath(0, j + 1);
-
-  for (int i = 0; i < minPathAux.size() - 2; i++)
-  {
-    cand.addEdge(minPathAux.getEdgeInfo(i));
+  if (minCostFound != -1 && colors_[headSelected] == FENG_COLOR_GREEN) {
+    /* estrategia de pascoal da certo, nao precisa do grafo amarelo */
+    cand.addEdge(deviationVertex, headSelected, minCostFound);
+    lastEdge = std::pair<int, int>(headSelected, headSelected);
   }
+  else {
+    std::vector<EdgeInfo> edgeInfoList = h.getEdgeInfoList();
 
-  std::pair<int, int> lastEdge = minPathAux.getEdge(minPathAux.size() - 2);
+    yellowGraph_->setAllEdgesRemoved();
+
+    int idx = 0;
+    for (std::vector<EdgeInfo>::iterator it = edgeInfoList.begin(); it != edgeInfoList.end(); ++it) {
+      EdgeInfo ei = *it;
+      if (! h.isRemoved(idx)) {
+        if (colors_[ei.tail] == FENG_COLOR_YELLOW) {
+          if (colors_[ei.head] == FENG_COLOR_YELLOW) {
+            yellowGraph_->setRemovedEdgeFlag(idx + ei.tail, EDGE_ENABLED);
+          }
+          else if (colors_[ei.head] == FENG_COLOR_GREEN) {
+            yellowGraph_->setRemovedEdgeFlag(idx + ei.tail, EDGE_ENABLED);
+            yellowGraph_->fengSetArtificialEdge(ei.head, EDGE_ENABLED);
+          }
+        }
+      }
+
+      idx++;
+    }
+
+    haruki::Path minPathAux = haruki::dijkstra::minPath(*yellowGraph_, deviationVertex, artificialEndVertex);
+
+    if (minPathAux.size() == 0) {
+      return minPathAux;
+    }
+
+    for (int i = 0; i < minPathAux.size() - 2; i++) {
+      cand.addEdge(minPathAux.getEdgeInfo(i));
+    }
+
+    lastEdge = minPathAux.getEdge(minPathAux.size() - 2);
+  }
 
   int prev = lastEdge.first;
   int prnt = dag_paths_next_[lastEdge.first];
@@ -166,10 +185,10 @@ Path FengKSP::generateCandidateAtEdge(Graph &h, int t, std::vector<Path> &R, Pat
   }
 
   // haruki::Path cand = path.subpath(0, j+1) + minPathAux;
-  return cand;
+return cand;
 }
 
-void FengKSP::initializeYellowGraph(Graph &g)
+void HybridKSP::initializeYellowGraph(Graph &g)
 {
   int numVert = g.getNumVert() + 1;
   int numEdges = g.getNumEdges() + g.getNumVert();
@@ -222,7 +241,7 @@ void FengKSP::initializeYellowGraph(Graph &g)
                            reverseTrace, edgeInfoList, std::vector<bool>(numEdges, true), numVert, numEdges);
 }
 
-std::vector<int> FengKSP::initialColor(Graph &g, int t, std::vector<Path> &R, Path &path, int oldDeviationIdx) {
+std::vector<int> HybridKSP::initialColor(Graph &g, int t, std::vector<Path> &R, Path &path, int oldDeviationIdx) {
   std::queue<int> vertexQueue;
   std::vector<int> newYellowList;
 
@@ -251,7 +270,7 @@ std::vector<int> FengKSP::initialColor(Graph &g, int t, std::vector<Path> &R, Pa
   return newYellowList;
 }
 
-std::vector<int> FengKSP::updateColor(Graph &g, int t, std::vector<Path> &R, Path &path, int deviationIdx) {
+std::vector<int> HybridKSP::updateColor(Graph &g, int t, std::vector<Path> &R, Path &path, int deviationIdx) {
   std::queue<int> vertexQueue;
   std::vector<int> newYellowList;
 
@@ -279,7 +298,7 @@ std::vector<int> FengKSP::updateColor(Graph &g, int t, std::vector<Path> &R, Pat
   return newYellowList;
 }
 
-void FengKSP::updateArtificialEdges(Graph &g, std::vector<int> newYellowList, int oldDeviation, int deviation) {
+void HybridKSP::updateArtificialEdges(Graph &g, std::vector<int> newYellowList, int oldDeviation, int deviation) {
   if (oldDeviation != -1) { 
     yellowGraph_->removeVertex(oldDeviation);
   }

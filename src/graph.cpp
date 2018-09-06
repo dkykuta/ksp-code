@@ -192,6 +192,11 @@ void Graph::setRemovedEdgeFlag(int tail, int head, bool flag)
   }
 }
 
+void Graph::setRemovedEdgeFlag(int edgeIndex, bool flag)
+{
+  edgesRemoved_[edgeIndex] = flag;
+}
+
 void Graph::removeEdges(std::vector<EdgeInfo> edges)
 {
   for (auto it = edges.begin(); it != edges.end(); ++it)
@@ -200,22 +205,35 @@ void Graph::removeEdges(std::vector<EdgeInfo> edges)
   }
 }
 
-void Graph::setAllEdgesRemoved()
-{
-  for (int i = 0; i < numEdges_; i++)
-  {
-    edgesRemoved_[i] = true;
-  }
-}
-
 const bool Graph::isRemoved(int edgeIdx) const
 {
   return edgesRemoved_[edgeIdx];
 }
+ 
+const bool Graph::isRemoved(int tail, int head) const
+{
+  int edgeIdx = getEdgeIndex(tail, head);
+  if (edgeIdx != -1)
+  {
+    return isRemoved(edgeIdx);
+  }
+
+  return true;
+}
+
+void Graph::setAllEdgesRemoved()
+{
+  setAllEdges(EDGE_DISABLED);
+}
 
 void Graph::resetEdgesRemoved()
 {
-  std::fill(edgesRemoved_.begin(), edgesRemoved_.end(), false);
+  setAllEdges(EDGE_ENABLED);
+}
+
+void Graph::setAllEdges(bool flag)
+{
+  std::fill(edgesRemoved_.begin(), edgesRemoved_.end(), flag);
 }
 
 void Graph::setRemovedForIncomingEdges(int v, bool flag)
@@ -227,13 +245,26 @@ void Graph::setRemovedForIncomingEdges(int v, bool flag)
   }
 }
 
+void Graph::setRemovedForOutgoingEdges(int v, bool flag) {
+  int endIdx = (v + 1 < numVert_ ? firstEdgeEachV_[v + 1] : numEdges_);
+  for (int idx = firstEdgeEachV_[v]; idx < endIdx; idx++)
+  {
+    edgesRemoved_[idx] = flag;
+  }
+}
+
+void Graph::removeVertex(int v) {
+  setRemovedForOutgoingEdges(v, EDGE_DISABLED);
+  setRemovedForIncomingEdges(v, EDGE_DISABLED);
+}
+
 void Graph::fengRemoveArtificialEdges(std::vector<int> &vertToRemove)
 {
   // std::sort(vertToRemove.begin(), vertToRemove.end());
 
   for (auto it = vertToRemove.begin(); it != vertToRemove.end(); ++it)
   {
-    setRemovedEdgeFlag(*it, numVert_ - 1, true);
+    setRemovedEdgeFlag(*it, numVert_ - 1, EDGE_DISABLED);
   }
 }
 
@@ -245,30 +276,22 @@ void Graph::fengAddArtificialEdges(std::vector<int> &newExpressVertex)
   }
   for (auto it = newExpressVertex.begin(); it != newExpressVertex.end(); ++it)
   {
-    setRemovedEdgeFlag(*it, numVert_ - 1, false);
+    setRemovedEdgeFlag(*it, numVert_ - 1, EDGE_ENABLED);
   }
-  // std::sort(newExpressVertex.begin(), newExpressVertex.end());
-
-  // int vIdx = 0;
-
-  // int endIdx = numEdges_;
-  // for (int idx = firstEdgeReverseV_[numVert_ - 1]; idx < endIdx; idx++)
-  // {
-  //   while (newExpressVertex[vIdx] < edgeInfoList_[reverseTrace_[idx]].tail)
-  //   {
-  //     vIdx++;
-  //   }
-  //   if (edgeInfoList_[reverseTrace_[idx]].tail == newExpressVertex[vIdx])
-  //   {
-  //     edgesRemoved_[reverseTrace_[idx]] = false;
-  //   }
-  // }
 }
 
-void Graph::fengSetEdgeRemovedFlag(int edgeIndex, bool flag)
-{
-  edgesRemoved_[edgeIndex] = flag;
+void Graph::fengSetArtificialEdge(int fromVertex, bool flag) {
+  int idx = -1;
+  if (fromVertex < numVert_ -1) {
+    idx = firstEdgeEachV_[fromVertex+1] -1;
+  }
+  else {
+    idx = numEdges_ - 1;
+  }
+  setRemovedEdgeFlag(idx, flag);
 }
+
+
 
 /*
  * GraphBuilder

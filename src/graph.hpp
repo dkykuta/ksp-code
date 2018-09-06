@@ -25,6 +25,9 @@
 #include "graphaux.hpp"
 #include "graphiterators.hpp"
 
+#define EDGE_DISABLED true
+#define EDGE_ENABLED false
+
 namespace haruki
 {
 
@@ -70,17 +73,22 @@ public:
   int getNumEdges() const { return numEdges_; }
   void removeEdge(int tail, int head);
   void setRemovedEdgeFlag(int tail, int head, bool flag);
+  void setRemovedEdgeFlag(int edgeIndex, bool flag);
   void removeEdges(std::vector<EdgeInfo> edges);
   void setAllEdgesRemoved();
+  void resetEdgesRemoved();
+  void setAllEdges(bool flag);
   void setRemovedForIncomingEdges(int v, bool flag);
+  void setRemovedForOutgoingEdges(int v, bool flag);
+  void removeVertex(int v);
   const double getEdgeCost(int tail, int head) const;
   const bool isRemoved(int edgeIdx) const;
-  void resetEdgesRemoved();
+  const bool isRemoved(int tail, int head) const;
 
   /* special for feng */
   void fengRemoveArtificialEdges(std::vector<int> &vertToRemove);
   void fengAddArtificialEdges(std::vector<int> &newExpressVertices);
-  void fengSetEdgeRemovedFlag(int edgeIndex, bool flag);
+  void fengSetArtificialEdge(int fromVertex, bool flag);
   std::vector<int> getReverseTrace() const {return reverseTrace_;}
   std::vector<int> getFirstEdgeEachV() const { return firstEdgeEachV_;}
   std::vector<int> getFirstEdgeReverseV() const { return firstEdgeReverseV_;}

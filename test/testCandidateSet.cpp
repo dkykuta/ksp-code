@@ -21,13 +21,17 @@
 */
 #include <gtest/gtest.h>
 #include "../src/candidateset.hpp"
+#include "../src/candidatepath.hpp"
+#include "../src/path.hpp"
 
 TEST(CANDIDATE_SET, CREATION) {
-    haruki::CandidateSet<int> c_set(10);
+    haruki::CandidateSet<int> c_set(10, 0);
 }
 
 TEST(CANDIDATE_SET, ADD) {
-    haruki::CandidateSet<int> c_set(10);
+    haruki::CandidateSet<int> c_set(10, 0);
+
+    ASSERT_EQ(0, c_set.size());
 
     c_set.addCandidate(3);
     c_set.addCandidate(7);
@@ -36,12 +40,7 @@ TEST(CANDIDATE_SET, ADD) {
 }
 
 TEST(CANDIDATE_SET, ADD_LIMIT) {
-    haruki::CandidateSet<int> c_set(3);
-
-    c_set.addCandidate(3);
-    c_set.addCandidate(7);
-
-    ASSERT_EQ(2, c_set.size());
+    haruki::CandidateSet<int> c_set(3, 0);
 
     c_set.addCandidate(3);
     c_set.addCandidate(7);
@@ -63,7 +62,7 @@ TEST(CANDIDATE_SET, ADD_LIMIT) {
 }
 
 TEST(CANDIDATE_SET, POP_FIRST) {
-    haruki::CandidateSet<int> c_set(10);
+    haruki::CandidateSet<int> c_set(10, 0);
 
     c_set.addCandidate(7);
     c_set.addCandidate(3);
@@ -73,10 +72,6 @@ TEST(CANDIDATE_SET, POP_FIRST) {
     ASSERT_EQ(1, c_set.size());
 
     c_set.addCandidate(4);
-    ASSERT_EQ(2, c_set.size());
-    c_set.addCandidate(4);
-    ASSERT_EQ(2, c_set.size());
-    c_set.addCandidate(3);
     ASSERT_EQ(2, c_set.size());
 }
 
@@ -90,19 +85,35 @@ TEST(CANDIDATE_SET, PATH) {
     path2.addEdge(12, 1, 12.7);
     path2.addEdge(1, 7, 3.5);
 
-    path3.addEdge(0, 10, 5.7);
-    path3.addEdge(10, 39, 2.1);
-    path3.addEdge(39, 2, 5.5);
-
-    haruki::CandidateSet<haruki::Path> c_set(10);
+    haruki::CandidateSet<haruki::Path> c_set(10, haruki::Path());
     c_set.addCandidate(path1);
     c_set.addCandidate(path2);
     ASSERT_EQ(2, c_set.size());
 
-    c_set.addCandidate(path3);
+    haruki::Path pPath = c_set.popFirst();
+    ASSERT_DOUBLE_EQ(13.3, pPath.cost());
+    ASSERT_EQ(path1, pPath);
+    ASSERT_EQ(1, c_set.size());
+}
+
+TEST(CANDIDATE_SET, CANDIDATE_PATH) {
+    haruki::Path path1, path2, path3;
+    path1.addEdge(0,10, 5.7);
+    path1.addEdge(10, 39, 2.1);
+    path1.addEdge(39, 2, 5.5);
+
+    path2.addEdge(0, 12, 99.1);
+    path2.addEdge(12, 1, 12.7);
+    path2.addEdge(1, 7, 3.5);
+
+    haruki::CandidatePath cp1(0, path1);
+
+    haruki::CandidateSet<haruki::CandidatePath> c_set(10, haruki::CandidatePath());
+    c_set.addCandidate(cp1);
+    c_set.addCandidate(haruki::CandidatePath(0, path2));
     ASSERT_EQ(2, c_set.size());
 
-    haruki::Path pPath = c_set.popFirst();
+    haruki::Path pPath = c_set.popFirst().path();
     ASSERT_DOUBLE_EQ(13.3, pPath.cost());
     ASSERT_EQ(path1, pPath);
     ASSERT_EQ(1, c_set.size());

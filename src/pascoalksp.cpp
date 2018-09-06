@@ -85,15 +85,6 @@ namespace haruki {
 
   Path PascoalKSP::generateCandidateAtEdge(Graph &h, int t, std::vector<Path> &R, Path &path, int j) {
     std::pair<int, int> edge = path.getEdge(j);
-    std::pair<int, int> auxEdge;
-    for (std::vector<Path>::iterator it = R.begin(); it != R.end(); it++) {
-      Path r = *it;
-      if (r.subpath(0, j+1) == path.subpath(0, j+1)) {
-        auxEdge = r.getEdge(j);
-        h.removeEdge(auxEdge.first, auxEdge.second);
-      }
-    }
-    h.removeEdge(edge.first, edge.second);
 
     float minCostFound = -1;
     int headSelected = -1;

@@ -26,8 +26,7 @@
 #include "yenksp.hpp"
 #include "pascoalksp.hpp"
 #include "fengksp.hpp"
-#include "fengcopyksp.hpp"
-#include "hybridfengksp.hpp"
+#include "hybridksp.hpp"
 #include "ksp.hpp"
 
 using std::string;
@@ -133,25 +132,10 @@ int main(int argc, char* argv[]) {
       }
       std::cout << std::endl;
     }
-  } else if (algorithm == "copyfeng") {
-    std::cout << "Algoritmo de Feng criando grafo amarelo" << std::endl << std::endl;
-    haruki::KSP<haruki::FengCopyKSP> ksp;
-    std::vector<haruki::Path> result4 = ksp.run(*g, s, t, k);
-
-    std::cout << "# Paths: " << result4.size() << std::endl;
-
-    for(std::vector<haruki::Path>::iterator it = result4.begin(); it != result4.end(); it++) {
-      std::cout << "[" << (*it).cost() << "] ";
-      std::vector<int> vertList = (*it).getVertList();
-      for (std::vector<int>::iterator it2 = vertList.begin(); it2 != vertList.end(); it2++) {
-        std::cout << *it2 << " ";
-      }
-      std::cout << std::endl;
-    }
-  } else if (algorithm == "hybridfeng") {
-    std::cout << "Algoritmo de Feng Alterado (hibrido)" << std::endl << std::endl;
-    haruki::KSP<haruki::HybridFengKSP> fengAlterado;
-    std::vector<haruki::Path> result4 = fengAlterado.run(*g, s, t, k);
+  } else if (algorithm == "hybrid") {
+    std::cout << "Algoritmo Híbrido Proposto" << std::endl << std::endl;
+    haruki::KSP<haruki::HybridKSP> hybrid;
+    std::vector<haruki::Path> result4 = hybrid.run(*g, s, t, k);
 
     std::cout << "# Paths: " << result4.size() << std::endl;
 

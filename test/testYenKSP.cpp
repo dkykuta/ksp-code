@@ -24,6 +24,7 @@
 #include "../src/ksp.hpp"
 #include "../src/path.hpp"
 #include "../src/graph.hpp"
+#include "../src/candidatepath.hpp"
 
 TEST(YEN_KSP, WRAPPED) {
     haruki::KSP<haruki::YenKSP> yen;
@@ -90,7 +91,7 @@ TEST(YEN_KSP, CANDIDATES) {
     minPath.addEdge(1, 5, 1.0);
     minPath.addEdge(5, 6, 1.0);
 
-    std::set<haruki::Path> rx;
+    std::set<haruki::CandidatePath> rx;
     haruki::Path paux1, paux2;
 
     paux1.addEdge(0, 1, 1.0);
@@ -101,12 +102,12 @@ TEST(YEN_KSP, CANDIDATES) {
     paux2.addEdge(2, 4, 2.0);
     paux2.addEdge(4, 6, 2.0);
 
-    rx.insert(paux1);
-    rx.insert(paux2);
+    rx.insert(haruki::CandidatePath(1, paux1));
+    rx.insert(haruki::CandidatePath(0, paux2));
 
     std::vector<haruki::Path> pvec;
 
-    std::set<haruki::Path> candidates = yenKSP.generateCandidates(g, 6, pvec, minPath);
+    std::set<haruki::CandidatePath> candidates = yenKSP.generateCandidates(g, 6, pvec, minPath, 0);
     ASSERT_EQ(2, candidates.size());
     ASSERT_EQ(rx, candidates);
 }

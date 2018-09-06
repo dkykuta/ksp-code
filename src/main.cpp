@@ -26,7 +26,6 @@
 #include "yenksp.hpp"
 #include "pascoalksp.hpp"
 #include "fengksp.hpp"
-#include "fengcopyksp.hpp"
 #include "hybridfengksp.hpp"
 #include "humanfriendlyksp.hpp"
 
@@ -101,23 +100,6 @@ int main(int argc, char* argv[]) {
   std::cout << "# Paths: " << result3.size() << std::endl;
 
   for(std::vector<haruki::Path>::iterator it = result3.begin(); it != result3.end(); it++) {
-    std::cout << "  [cost: " << (*it).cost() << "]" << std::endl;
-    std::vector<int> vertList = (*it).getVertList();
-    for (std::vector<int>::iterator it2 = vertList.begin(); it2 != vertList.end(); it2++) {
-      std::cout << *it2 << " ";
-    }
-    std::cout << std::endl;
-  }
-
-  std::cout << std::endl;
-
-  std::cout << "Algoritmo de Feng criando grafo amarelo" << std::endl << std::endl;
-  haruki::HumanFriendlyKSP<haruki::FengCopyKSP> fengCopy;
-  std::vector<haruki::Path> result4 = fengCopy.run(*g, s, t, k);
-
-  std::cout << "# Paths: " << result4.size() << std::endl;
-
-  for(std::vector<haruki::Path>::iterator it = result4.begin(); it != result4.end(); it++) {
     std::cout << "  [cost: " << (*it).cost() << "]" << std::endl;
     std::vector<int> vertList = (*it).getVertList();
     for (std::vector<int>::iterator it2 = vertList.begin(); it2 != vertList.end(); it2++) {

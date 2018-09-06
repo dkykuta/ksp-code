@@ -26,19 +26,30 @@
 #include "path.hpp"
 #include "graph.hpp"
 #include "pascoalksp.hpp"
+#include <chrono>
 
 namespace haruki
 {
 
-class FengCopyKSP : public PascoalKSP
+// #define FENG_COLOR_RED 1
+// #define FENG_COLOR_YELLOW 2
+// #define FENG_COLOR_GREEN 3
+
+class HybridKSP : public PascoalKSP
 {
 protected:
-  std::vector<std::vector<int>> dag_paths_upstream_;
+  std::vector<std::vector<int> > dag_paths_upstream_;
   std::vector<int> colors_;
-  virtual std::set<Path> generateCandidates(Graph &g, int t, std::vector<Path> &R, Path &path);
+  Graph *yellowGraph_;
+
+  virtual std::set<CandidatePath> generateCandidates(Graph& g, int t, std::vector<Path> &R, Path &path, int oldDeviationIdx);
   virtual Path generateCandidateAtEdge(Graph &h, int t, std::vector<Path> &R, Path &path, int j);
-  virtual void fixColorsNewDeviationVertex(Graph &g, int t, std::vector<Path> &R, Path &path, int deviationVertex);
-  virtual void removeEdgesSharedPrefix(Graph &h, int t, std::vector<Path> &R, Path &path, int j);
+  
+
+  virtual void initializeYellowGraph(Graph &g);
+  std::vector<int> initialColor(Graph &g, int t, std::vector<Path> &R, Path &path, int oldDeviationIdx);
+  std::vector<int> updateColor(Graph &g, int t, std::vector<Path> &R, Path &path, int deviationIdx);
+  void updateArtificialEdges(Graph &g, std::vector<int> newYellowList, int oldDeviation, int deviation);
 
 public:
   virtual void preproc(Graph &g, int s, int t, int k);

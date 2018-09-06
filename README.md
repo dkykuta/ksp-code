@@ -1,2 +1,2 @@
 # ksp-code
-Master's degree @ Univerty of Sao Paulo.
+Master's degree @ University of Sao Paulo.

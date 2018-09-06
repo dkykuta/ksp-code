@@ -19,34 +19,44 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
 */
-#pragma once
+#include <gtest/gtest.h>
+#include "../src/candidatepath.hpp"
 
-#include <vector>
-#include <set>
-#include "path.hpp"
-#include "graph.hpp"
-#include "pascoalksp.hpp"
-#include <chrono>
+TEST(CANDIDATE_PATH, COMPARE) {
+    haruki::Path path1;
+    path1.addEdge(0, 10, 5.7);
+    path1.addEdge(10, 39, 2.1);
+    path1.addEdge(39, 2, 5.5);
 
-namespace haruki
-{
+    haruki::Path path2;
+    path2.addEdge(0, 10, 5.7);
+    path2.addEdge(10, 39, 2.1);
+    path2.addEdge(39, 2, 5.5);
 
-class HybridFengKSP : public PascoalKSP
-{
-protected:
-  std::vector<std::vector<int> > dag_paths_upstream_;
-  std::vector<int> colors_;
-  Graph *yellowGraph_;
+    haruki::Path path3;
+    path3.addEdge(0, 19, 5.7);
+    path3.addEdge(19, 29, 2.1);
+    path3.addEdge(29, 2, 5.5);
 
-  virtual std::set<Path> generateCandidates(Graph& g, int t, std::vector<Path> &R, Path &path);
-  virtual Path generateCandidateAtEdge(Graph &h, int t, std::vector<Path> &R, Path &path, int j);
-  virtual void fixColorsNewDeviationVertex(Graph &g, int t, std::vector<Path> &R, Path &path, int deviationVertex);
-  virtual void initializeYellowGraph(Graph &g);
-  virtual void removeEdgesSharedPrefix(Graph &h, int t, std::vector<Path> &R, Path &path, int j);
+    haruki::Path path4;
+    path4.addEdge(0, 11, 9.7);
+    path4.addEdge(11, 29, 2.1);
+    path4.addEdge(29, 2, 5.5);
 
-public:
-  virtual void preproc(Graph &g, int s, int t, int k);
-  virtual std::vector<Path> ksp(Graph &g, int s, int t, int k);
-  virtual std::vector<Path> posproc(Graph &g, int s, int t, int k, std::vector<Path> response);
-};
+    haruki::CandidatePath cp1(0, path1);
+    haruki::CandidatePath cp2(0, path2);
+    haruki::CandidatePath cp3(0, path3);
+    haruki::CandidatePath cp4(0, path4);
+
+    ASSERT_EQ(path1 == path2, cp1 == cp2);
+    ASSERT_EQ(path1 < path2, cp1 < cp2);
+    ASSERT_EQ(path1 > path2, cp1 > cp2);
+
+    ASSERT_EQ(path1 == path3, cp1 == cp3);
+    ASSERT_EQ(path1 < path3, cp1 < cp3);
+    ASSERT_EQ(path1 > path3, cp1 > cp3);
+
+    ASSERT_EQ(path1 == path4, cp1 == cp4);
+    ASSERT_EQ(path1 < path4, cp1 < cp4);
+    ASSERT_EQ(path1 > path4, cp1 > cp4);
 }
